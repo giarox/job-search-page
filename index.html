@@ -5,12 +5,42 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Search Page</title>
-    <!-- Preload essential resources here -->
+    <!-- Preload essential resources -->
+    <link rel="preload" href="styles.css" as="style">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>Welcome to the Job Search Page</h1>
-    <!-- Search and filter components will go here -->
+    
+    <!-- Search Bar -->
+    <input type="text" id="search-input" placeholder="Search jobs..." />
+
+    <!-- Filters -->
+    <div id="filters">
+        <select id="filter-luogo">
+            <option value="">All Locations</option>
+            <!-- Dynamic options will be added via JavaScript -->
+        </select>
+
+        <select id="filter-azienda">
+            <option value="">All Companies</option>
+            <!-- Dynamic options will be added via JavaScript -->
+        </select>
+
+        <select id="filter-regione">
+            <option value="">All Regions</option>
+            <!-- Dynamic options will be added via JavaScript -->
+        </select>
+    </div>
+
+    <!-- Job Listings -->
+    <div id="job-listings">
+        <!-- Job entries will be dynamically inserted here -->
+    </div>
+
+    <!-- Prefetch the CSV file -->
+    <link rel="prefetch" href="jobs.csv" as="fetch">
+
     <script src="script.js" defer></script>
 </body>
 </html>
