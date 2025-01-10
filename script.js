@@ -3,11 +3,13 @@
 // Function to fetch and parse CSV
 async function fetchJobs() {
     try {
+        console.log("Fetching jobs.csv...");
         const response = await fetch('jobs.csv');
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         const data = await response.text();
+        console.log("CSV data fetched successfully.");
         return parseCSV(data);
     } catch (error) {
         console.error('Error fetching the CSV file:', error);
@@ -17,6 +19,7 @@ async function fetchJobs() {
 
 // Function to parse CSV into JavaScript objects
 function parseCSV(data) {
+    console.log("Parsing CSV data...");
     const lines = data.trim().split('\n');
     const headers = lines[0].split(',').map(header => header.trim());
     const jobs = lines.slice(1).map(line => {
@@ -27,11 +30,13 @@ function parseCSV(data) {
         });
         return job;
     });
+    console.log(`Parsed ${jobs.length} job entries.`);
     return jobs;
 }
 
 // Function to display jobs
 function displayJobs(jobs) {
+    console.log("Displaying jobs...");
     const jobListings = document.getElementById('job-listings');
     jobListings.innerHTML = ''; // Clear existing listings
 
@@ -79,10 +84,13 @@ function displayJobs(jobs) {
 
         jobListings.appendChild(jobDiv);
     });
+
+    console.log("Jobs displayed successfully.");
 }
 
 // Function to populate filter options
 function populateFilters(jobs) {
+    console.log("Populating filter options...");
     const filterLuogo = document.getElementById('filter-luogo');
     const filterAzienda = document.getElementById('filter-azienda');
     const filterRegione = document.getElementById('filter-regione');
@@ -111,10 +119,13 @@ function populateFilters(jobs) {
         option.textContent = regione;
         filterRegione.appendChild(option);
     });
+
+    console.log("Filter options populated.");
 }
 
 // Function to handle search and filter
 function handleSearchAndFilter(jobs) {
+    console.log("Setting up search and filter handlers...");
     const searchInput = document.getElementById('search-input');
     const filterLuogo = document.getElementById('filter-luogo');
     const filterAzienda = document.getElementById('filter-azienda');
@@ -127,7 +138,7 @@ function handleSearchAndFilter(jobs) {
         const regione = filterRegione.value;
 
         const filtered = jobs.filter(job => {
-            const matchesSearch = Object.values(job).some(value => 
+            const matchesSearch = Object.values(job).some(value =>
                 value.toLowerCase().includes(query)
             );
             const matchesLuogo = luogo === '' || job['Luogo'] === luogo;
@@ -154,19 +165,24 @@ function handleSearchAndFilter(jobs) {
     filterLuogo.addEventListener('change', filterJobs);
     filterAzienda.addEventListener('change', filterJobs);
     filterRegione.addEventListener('change', filterJobs);
+
+    console.log("Search and filter handlers set up.");
 }
 
 // Initialize the page
 async function init() {
+    console.log("Initializing job search page...");
     const jobs = await fetchJobs();
     if (jobs.length === 0) {
         const jobListings = document.getElementById('job-listings');
         jobListings.innerHTML = '<p>No job listings available.</p>';
+        console.log("No jobs to display.");
         return;
     }
     populateFilters(jobs);
     displayJobs(jobs);
     handleSearchAndFilter(jobs);
+    console.log("Job search page initialized successfully.");
 }
 
 // Run the init function when the DOM is loaded
