@@ -17,7 +17,7 @@ async function fetchJobs() {
     }
 }
 
-// Function to parse CSV into JavaScript objects
+// Optimized parseCSV with preprocessing
 function parseCSV(data) {
     console.log("Parsing CSV data...");
     const lines = data.trim().split('\n');
@@ -27,6 +27,10 @@ function parseCSV(data) {
         const job = {};
         headers.forEach((header, index) => {
             job[header] = values[index] || '';
+            // Preprocess searchable fields
+            if (['Title', 'Azienda', 'Luogo', 'Regione', 'link_posizione'].includes(header)) {
+                job[`_${header.toLowerCase()}`] = (values[index] || '').toLowerCase();
+            }
         });
         return job;
     });
@@ -34,57 +38,28 @@ function parseCSV(data) {
     return jobs;
 }
 
-// Function to display jobs
+// Function to display jobs using innerHTML
 function displayJobs(jobs) {
     console.log("Displaying jobs...");
     const jobListings = document.getElementById('job-listings');
-    jobListings.innerHTML = ''; // Clear existing listings
+    let html = ''; // Initialize HTML string
 
     jobs.forEach(job => {
-        const jobDiv = document.createElement('div');
-        jobDiv.classList.add('job');
-
-        // Featured Image
-        const img = document.createElement('img');
-        img.src = job['Featured Image'] || 'default-logo.png';
-        img.alt = `${job['Azienda']} Logo`;
-        img.onerror = () => { img.src = 'default-logo.png'; }; // Fallback image
-
-        // Job Details
-        const detailsDiv = document.createElement('div');
-        detailsDiv.classList.add('job-details');
-
-        const title = document.createElement('h2');
-        title.textContent = job['Title'];
-
-        const company = document.createElement('p');
-        company.textContent = `Company: ${job['Azienda']}`;
-
-        const location = document.createElement('p');
-        location.textContent = `Location: ${job['Luogo']}`;
-
-        const region = document.createElement('p');
-        region.textContent = `Region: ${job['Regione']}`;
-
-        const link = document.createElement('a');
-        link.href = job['link_posizione'];
-        link.textContent = 'Apply Here';
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-
-        // Assemble Job Entry
-        detailsDiv.appendChild(title);
-        detailsDiv.appendChild(company);
-        detailsDiv.appendChild(location);
-        detailsDiv.appendChild(region);
-        detailsDiv.appendChild(link);
-
-        jobDiv.appendChild(img);
-        jobDiv.appendChild(detailsDiv);
-
-        jobListings.appendChild(jobDiv);
+        html += `
+            <div class="job">
+                <img src="${job['Featured Image'] || 'default-logo.png'}" alt="${job['Azienda']} Logo" loading="lazy" onerror="this.src='default-logo.png'">
+                <div class="job-details">
+                    <h2>${job['Title']}</h2>
+                    <p>Company: ${job['Azienda']}</p>
+                    <p>Location: ${job['Luogo']}</p>
+                    <p>Region: ${job['Regione']}</p>
+                    <a href="${job['link_posizione']}" target="_blank" rel="noopener noreferrer">Apply Here</a>
+                </div>
+            </div>
+        `;
     });
 
+    jobListings.innerHTML = html; // Set all jobs at once
     console.log("Jobs displayed successfully.");
 }
 
@@ -123,6 +98,15 @@ function populateFilters(jobs) {
     console.log("Filter options populated.");
 }
 
+// Debounce function with 200ms delay
+function debounce(func, delay = 200) {
+    let debounceTimer;
+    return function(...args) {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
 // Function to handle search and filter
 function handleSearchAndFilter(jobs) {
     console.log("Setting up search and filter handlers...");
@@ -150,18 +134,7 @@ function handleSearchAndFilter(jobs) {
         displayJobs(filtered);
     }
 
-    // Debounce function to limit the rate of function calls
-    function debounce(func, delay) {
-        let debounceTimer;
-        return function() {
-            const context = this;
-            const args = arguments;
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => func.apply(context, args), delay);
-        };
-    }
-
-    searchInput.addEventListener('input', debounce(filterJobs, 300));
+    searchInput.addEventListener('input', debounce(filterJobs, 200));
     filterLuogo.addEventListener('change', filterJobs);
     filterAzienda.addEventListener('change', filterJobs);
     filterRegione.addEventListener('change', filterJobs);
